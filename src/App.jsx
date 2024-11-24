@@ -8,12 +8,11 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-[#1a1b3b] text-white p-4">
+      <div className="min-h-screen bg-[#1a1b3b] text-white px-4">
         <Routes>
           <Route path="/" element={<QuizHome />} />
           <Route path="/wait" element={<QuizWait />} />
         </Routes>
-        <ToastContainer position="top-center" theme="dark" />
       </div>
     </Router>
   );
