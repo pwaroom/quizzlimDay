@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /dailyMovies/{document=**} {
+      allow read: if true;  // Permitir lectura pública
+      allow write: if false;  // No permitir escritura desde el cliente
+    }
+  }
+}
