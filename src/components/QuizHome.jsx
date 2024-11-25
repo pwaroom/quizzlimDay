@@ -15,6 +15,14 @@ export default function QuizHome() {
   const navigate = useNavigate();
 
   useEffect(() => {
+
+    // Comprueba si se ha completado el juego 
+    const quizCompleted = localStorage.getItem('quizCompleted') === 'true';
+    if (quizCompleted) {
+        navigate('/wait');
+        return;
+    }
+
     const fetchTodayMovie = async () => {
       try {
         setLoading(true);
@@ -22,25 +30,20 @@ export default function QuizHome() {
         
         // Obtener la fecha de hoy (formato YYYY-MM-DD)
         const today = new Date().toISOString().split('T')[0];
-        
+
         // Verificar si la fecha guardada en localStorage es la misma que hoy
         const storedDate = localStorage.getItem('date');
-        console.log('Stored date in localStorage:', storedDate);
-
 
         // Si la fecha guardada no es hoy, actualizamos el índice de la película y la fecha
         if (storedDate !== today) {
           const nextMovieIndex = getNextMovieIndex(); // Obtener el índice de la película del día
-          console.log('Setting new movie index:', nextMovieIndex);
           localStorage.setItem('date', today);  // Guardar la fecha actual
           localStorage.setItem('movieIndex', nextMovieIndex);  // Guardar el índice de la película
+          localStorage.setItem('quizCompleted', 'false'); // Reseteamos el flag al cambiar de día
         }
 
         // Obtener el índice de la película para el día actual desde localStorage
         const movieIndex = parseInt(localStorage.getItem('movieIndex') || '1'); // Aseguramos que empiece desde 1
-        console.log('Movie index from localStorage:', movieIndex);
-
-
         // Consultar Firestore para obtener la lista de películas
         const moviesRef = collection(db, 'dailyMovies');
         const querySnapshot = await getDocs(moviesRef);
@@ -71,7 +74,7 @@ export default function QuizHome() {
 
   // Función para obtener el índice de la película del día (basado en la fecha)
   const getNextMovieIndex = () => {
-    const startDate = new Date('2024-11-24'); // Fecha de inicio
+    const startDate = new Date('2024-11-25'); // Fecha de inicio
     const currentDate = new Date();
     const diffTime = currentDate - startDate;
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -135,9 +138,11 @@ export default function QuizHome() {
 
  
     if (isAnswerCorrect) {
+      localStorage.setItem('quizCompleted', 'true');
       setIsCorrect(true);
       setTimeout(() => navigate('/wait'), 2000);
     } else {
+      localStorage.setItem('quizCompleted', 'true');
       setIsWrong(true);
       setTimeout(() => setIsWrong(false), 3000);
       if (newAttempts.length >= 5) {
@@ -217,10 +222,11 @@ export default function QuizHome() {
   
         {/* Pregunta y Emojis */}
         <div className="bg-[#2A2B4B] rounded-lg p-6 mb-6 shadow-md">
+
           <h1 className="text-4xl font-bold mb-4">
             ¿Qué peli es? <span className="text-3xl text-purple-500">{movie.genre}</span>
           </h1>
-          <div className="text-6xl mb-6 flex justify-center gap-4 py-8">{movie.emoji}</div>
+          <div className="text-6xl mb-6 flex justify-center gap-6 py-8 tracking-[0.4em]">{movie.emoji}</div>
         </div>
   
         {/* Input y Botón */}
