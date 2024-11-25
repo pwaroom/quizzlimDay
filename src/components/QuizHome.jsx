@@ -224,7 +224,7 @@ export default function QuizHome() {
         <div className="bg-[#2A2B4B] rounded-lg p-6 mb-6 shadow-md">
 
           <h1 className="text-4xl font-bold mb-4">
-            ¿Qué peli es? <span className="text-3xl text-purple-500">{movie.genre}</span>
+            ¿Qué peli es? <br></br> <span className="text-3xl text-purple-500">{movie.genre}</span>
           </h1>
           <div className="text-6xl mb-6 flex justify-center gap-6 py-8 tracking-[0.4em]">{movie.emoji}</div>
         </div>
