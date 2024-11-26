@@ -152,8 +152,6 @@ export default function QuizHome() {
       setIsCorrect(true);
       setTimeout(() => setAnswer(''), 2000);
     } else {
-      localStorage.setItem('quizCompleted', 'true');
-      setQuizCompleted(true);
       setIsWrong(true);
       setTimeout(() => setIsWrong(false), 3000);
       if (newAttempts.length >= 5) {
