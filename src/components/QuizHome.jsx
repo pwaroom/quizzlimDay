@@ -31,19 +31,21 @@ export default function QuizHome() {
         // Obtener la fecha de hoy (formato YYYY-MM-DD)
         const today = new Date().toISOString().split('T')[0];
 
+        // Obtener índice basado en la fecha
+        const startDate = new Date('2024-11-25');
+        const currentDate = new Date();
+        const diffTime = currentDate - startDate;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        let movieIndex = diffDays + 1; // Calcula el índice de la película basada en los días desde la fecha inicial
+
         // Verificar si la fecha guardada en localStorage es la misma que hoy
         const storedDate = localStorage.getItem('date');
-
-        // Si la fecha guardada no es hoy, actualizamos el índice de la película y la fecha
         if (storedDate !== today) {
-          const nextMovieIndex = getNextMovieIndex(); // Obtener el índice de la película del día
-          localStorage.setItem('date', today);  // Guardar la fecha actual
-          localStorage.setItem('movieIndex', nextMovieIndex);  // Guardar el índice de la película
-          localStorage.setItem('quizCompleted', 'false'); // Reseteamos el flag al cambiar de día
+          // Si la fecha almacenada no es la misma que hoy, actualizamos los datos
+          localStorage.setItem('date', today); // Guardamos la fecha actual
+          localStorage.setItem('movieIndex', movieIndex); // Guardamos el índice de la película
+          localStorage.setItem('quizCompleted', 'false'); // Restablecemos el estado del quiz
         }
-
-        // Obtener el índice de la película para el día actual desde localStorage
-        const movieIndex = parseInt(localStorage.getItem('movieIndex') || '1'); // Aseguramos que empiece desde 1
         // Consultar Firestore para obtener la lista de películas
         const moviesRef = collection(db, 'dailyMovies');
         const querySnapshot = await getDocs(moviesRef);
