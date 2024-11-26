@@ -11,7 +11,6 @@ function App() {
       <div className="min-h-screen bg-[#1a1b3b] text-white px-4">
         <Routes>
           <Route path="/" element={<QuizHome />} />
-          <Route path="/wait" element={<QuizWait />} />
         </Routes>
       </div>
     </Router>

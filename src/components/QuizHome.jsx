@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import QuizWait from './QuizWait';
 import { format } from 'date-fns';
 
 export default function QuizHome() {
@@ -12,15 +13,37 @@ export default function QuizHome() {
   const [isWrong, setIsWrong] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [quizCompleted, setQuizCompleted] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
 
+    // Obtener la fecha de hoy (formato YYYY-MM-DD)
+    const today = new Date().toISOString().split('T')[0];
+
+    // Obtener índice basado en la fecha
+    const startDate = new Date('2024-11-25');
+    const currentDate = new Date();
+    const diffTime = currentDate - startDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    let movieIndex = diffDays + 1; // Calcula el índice de la película basada en los días desde la fecha inicial
+
+    // Verificar si la fecha guardada en localStorage es la misma que hoy
+    const storedDate = localStorage.getItem('date');
+
+    // Si la fecha almacenada no es la misma que hoy, actualizamos los datos
+    if (storedDate !== today) {
+      console.log(movieIndex);
+      localStorage.setItem('date', today); // Guardamos la fecha actual
+      localStorage.setItem('movieIndex', movieIndex); // Guardamos el índice de la película
+      localStorage.setItem('quizCompleted', 'false'); // Restablecemos el estado del quiz
+    }
+
     // Comprueba si se ha completado el juego 
     const quizCompleted = localStorage.getItem('quizCompleted') === 'true';
     if (quizCompleted) {
-        navigate('/wait');
-        return;
+      setLoading(false);
+      return setQuizCompleted(true);
     }
 
     const fetchTodayMovie = async () => {
@@ -28,24 +51,8 @@ export default function QuizHome() {
         setLoading(true);
         setError(null);
         
-        // Obtener la fecha de hoy (formato YYYY-MM-DD)
-        const today = new Date().toISOString().split('T')[0];
+        
 
-        // Obtener índice basado en la fecha
-        const startDate = new Date('2024-11-25');
-        const currentDate = new Date();
-        const diffTime = currentDate - startDate;
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        let movieIndex = diffDays + 1; // Calcula el índice de la película basada en los días desde la fecha inicial
-
-        // Verificar si la fecha guardada en localStorage es la misma que hoy
-        const storedDate = localStorage.getItem('date');
-        if (storedDate !== today) {
-          // Si la fecha almacenada no es la misma que hoy, actualizamos los datos
-          localStorage.setItem('date', today); // Guardamos la fecha actual
-          localStorage.setItem('movieIndex', movieIndex); // Guardamos el índice de la película
-          localStorage.setItem('quizCompleted', 'false'); // Restablecemos el estado del quiz
-        }
         // Consultar Firestore para obtener la lista de películas
         const moviesRef = collection(db, 'dailyMovies');
         const querySnapshot = await getDocs(moviesRef);
@@ -141,14 +148,16 @@ export default function QuizHome() {
  
     if (isAnswerCorrect) {
       localStorage.setItem('quizCompleted', 'true');
+      setQuizCompleted(true);
       setIsCorrect(true);
-      setTimeout(() => navigate('/wait'), 2000);
+      setTimeout(() => setAnswer(''), 2000);
     } else {
       localStorage.setItem('quizCompleted', 'true');
+      setQuizCompleted(true);
       setIsWrong(true);
       setTimeout(() => setIsWrong(false), 3000);
       if (newAttempts.length >= 5) {
-        setTimeout(() => navigate('/wait'), 2000);
+        setTimeout(() => setQuizCompleted(true), 2000);
       }
     }
     setAnswer('');
@@ -173,7 +182,12 @@ export default function QuizHome() {
     </div>
   );
 
+  if (quizCompleted) {
+    return <QuizWait />
+  }
+  
   if (!movie) return null;
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-white px-2">
